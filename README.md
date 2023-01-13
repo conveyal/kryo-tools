@@ -49,4 +49,38 @@ this article:
 
 https://sormuras.github.io/blog/2018-09-11-testing-in-the-modular-world.html#white-box-modular-testing-with-extra-java-command-line-options
 
-TODO: examples of adding exceptions (copy from R5 or OTP2)
+In Gradle this might look like:
+```Groovy
+test {
+    useJUnitPlatform()
+    jvmArgs = ['--add-opens=java.base/java.io=ALL-UNNAMED',
+               '--add-opens=java.base/java.time=ALL-UNNAMED',
+               '--add-opens=java.base/java.time.zone=ALL-UNNAMED',
+               '--add-opens=java.base/java.lang=ALL-UNNAMED']
+}
+```
+
+In Maven:
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>3.0.0-M7</version>
+    <configuration>
+        <!-- we have to fork the JVM during tests so that the argLine is passed along -->
+        <forkCount>3</forkCount>
+        <!-- enable the restricted reflection under Java 11 so that the ObjectDiffer works
+             the @{argLine} part is there to allow jacoco to insert its arguments as well
+        -->
+        <argLine>
+            @{argLine}
+            -Xmx2G
+            -Dfile.encoding=UTF-8
+            --add-opens java.base/java.io=ALL-UNNAMED
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.math=ALL-UNNAMED
+            --add-opens java.base/java.net=ALL-UNNAMED
+        </argLine>
+    </configuration>
+</plugin>
+```
